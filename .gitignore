@@ -1,32 +1,138 @@
-# Prerequisites
-*.d
+#include <iostream>
+#include <stack>
+#include <string>
+#include <sstream>
+#include <cmath>
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+using namespace std;
 
-# Precompiled Headers
-*.gch
-*.pch
+// Function to calculate the result of an infix expression
+double infixToPostfix(string expression) {
+    // Create a stack to store operators
+    stack<char> operators;
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+    // Create a stack to store operands
+    stack<double> operands;
 
-# Fortran module files
-*.mod
-*.smod
+    // Loop through each character in the expression
+    for (int i = 0; i < expression.length(); i++) {
+        // If the character is a digit, push it onto the operand stack
+        if (isdigit(expression[i])) {
+            double operand = 0;
+            while (i < expression.length() && isdigit(expression[i])) {
+                operand = (operand * 10) + (expression[i] - '0');
+                i++;
+            }
+            i--;
+            operands.push(operand);
+        }
+        // If the character is an operator, push it onto the operator stack
+        else if (expression[i] == '+' || expression[i] == '-' || expression[i] == '*' || expression[i] == '/' || expression[i] == '^') {
+            while (!operators.empty() && operators.top() != '(' && ((expression[i] != '^' && (operators.top() == '*' || operators.top() == '/')) || (expression[i] == '^' && (operators.top() == '^' || operators.top() == '*' || operators.top() == '/')))) {
+                double operand2 = operands.top();
+                operands.pop();
+                double operand1 = operands.top();
+                operands.pop();
+                char op = operators.top();
+                operators.pop();
+                double result;
+                switch (op) {
+                    case '+':
+                        result = operand1 + operand2;
+                        break;
+                    case '-':
+                        result = operand1 - operand2;
+                        break;
+                    case '*':
+                        result = operand1 * operand2;
+                        break;
+                    case '/':
+                        result = operand1 / operand2;
+                        break;
+                    case '^':
+                        result = pow(operand1, operand2);
+                        break;
+                }
+                operands.push(result);
+            }
+            operators.push(expression[i]);
+        }
+        // If the character is an opening parenthesis, push it onto the operator stack
+        else if (expression[i] == '(') {
+            operators.push(expression[i]);
+        }
+        // If the character is a closing parenthesis, evaluate the expression inside the parentheses
+        // and push the result onto the operand stack
+        else if (expression[i] == ')') {
+            while (!operators.empty() && operators.top() != '(') {
+                double operand2 = operands.top();
+                operands.pop();
+                double operand1 = operands.top();
+                operands.pop();
+                char op = operators.top();
+                operators.pop();
+                double result;
+                switch (op) {
+                    case '+':
+                        result = operand1 + operand2;
+                        break;
+                    case '-':
+                        result = operand1 - operand2;
+                        break;
+                    case '*':
+                        result = operand1 * operand2;
+                        break;
+                    case '/':
+                        result = operand1 / operand2;
+                        break;
+                    case '^':
+                        result = pow(operand1, operand2);
+                        break;
+                }
+                operands.push(result);
+            }
+            if (!operators.empty()) {
+                operators.pop();
+            }
+        }
+    }
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
+    // Evaluate any remaining operators and operands
+    while (!operators.empty()) {
+        double operand2 = operands.top();
+        operands.pop();
+        double operand1 = operands.top();
+        operands.pop();
+        char op = operators.top();
+        operators.pop();
+        double result;
+        switch (op) {
+            case '+':
+                result = operand1 + operand2;
+                break;
+            case '-':
+                result = operand1 - operand2;
+                break;
+            case '*':
+                result = operand1 * operand2;
+                break;
+            case '/':
+                result = operand1 / operand2;
+                break;
+            case '^':
+                result = pow(operand1, operand2);
+                break;
+        }
+        operands.push(result);
+    }
 
-# Executables
-*.exe
-*.out
-*.app
+    // Return the final result
+    return operands.top();
+}
+int main() {
+    string expression;
+    cout << "Enter a prefix or postfix expression: ";
+    getline(cin, expression);
+     cout << "Result: " << infixToPostfix(expression) << endl;
+     return 0;
+}
